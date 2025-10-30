@@ -23,7 +23,7 @@ func generateRandomElements(size int) []int {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	slice := make([]int, size)
 	for i := range slice {
-		slice[i] = r.Intn(SIZE)
+		slice[i] = r.Int()
 	}
 	return slice
 }
@@ -51,22 +51,18 @@ func maximum(data []int) int {
 func maxChunks(data []int) int {
 	// ваш код здесь
 	partSize := len(data) / CHUNKS
-	remainder := len(data)%CHUNKS - 1
 	finalMax := make([]int, CHUNKS)
 	for i := 0; i < CHUNKS; i++ {
 		wg.Add(1)
-		x1 := i * partSize
-		x2 := x1 + partSize + remainder
-		go func(i, x1, x2 int) {
+		start := i * partSize
+		end := start + partSize
+		if i == (CHUNKS - -1) {
+			end = len(data)
+		}
+		go func(data []int) {
 			defer wg.Done()
-			max := 0
-			for j := x1; j <= x2; j++ {
-				if data[j] > max {
-					max = data[j]
-				}
-			}
-			finalMax[i] = max
-		}(i, x1, x2)
+			finalMax[i] = maximum(data)
+		}(data[start:end])
 	}
 	wg.Wait()
 
